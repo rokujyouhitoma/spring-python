@@ -1,10 +1,5 @@
-from spring_python import (
-    AnnotationConfigApplicationContext,
-    AppConfig,
-    ApplicationContext,
-    UserRepository,
-    UserService,
-)
+from spring_python import AnnotationConfigApplicationContext, ApplicationContext
+from spring_python.codes import AppConfig, UserRepository, UserService
 
 
 def test_import():

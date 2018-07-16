@@ -10,7 +10,7 @@ flake8:
 	flake8
 
 mypy:
-	mypy .
+	mypy src
 
 pytest:
 	PYTHONPATH=src pytest
