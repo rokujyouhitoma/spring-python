@@ -10,9 +10,6 @@ class Configuration(object):
     def __init__(self, AppConfig) -> None:
         self.appConfig = AppConfig()
 
-    def get(self, name):
-        return getattr(self.appConfig, name)
-
 
 class ApplicationContext(object):
     def getBean(self, Klass) -> Any:
@@ -32,7 +29,9 @@ class AnnotationConfigApplicationContext(ApplicationContext):
             return s[:1].lower() + s[1:]
 
         methodName = getMethodName(name)
-        return self.configuration.get(methodName)()
+        # TODO: xxx
+        bean = getattr(self.configuration.appConfig, methodName)
+        return bean.call(self.configuration.appConfig)
 
 
 # User codes
@@ -44,42 +43,64 @@ class User(object):
 
 class UserRepository(object):
     @abstractmethod
-    def register(user: User, rawPassword: str) -> None:
+    def register(self, user: User, rawPassword: str) -> None:
         pass
 
 
 class PasswordEncoder(object):
     @abstractmethod
-    def encode(rawPassword: str) -> str:
+    def encode(self, rawPassword: str) -> str:
         pass
 
 
 class UserService(object):
     @abstractmethod
-    def save(User, user):
+    def save(self, user: User) -> None:
         pass
 
     @abstractmethod
-    def countByUserName(userName: str) -> int:
+    def countByUserName(self, userName: str) -> int:
         pass
 
 
 class UserRepositoryImpl(UserRepository):
-    pass
+    def __init__(self):
+        pass
+
+    def register(self, user: User, rawPassword: str) -> None:
+        pass
 
 
 class UserServiceImpl(UserService):
-    pass
+    def __init__(self, userRepository: UserRepository,
+                 passwordEncoder: PasswordEncoder):
+        self.userRepository = userRepository
+        self.passwordEncoder = passwordEncoder
+
+    def save(self, user: User) -> None:
+        return
+
+    def countByUserName(self, userName: str) -> int:
+        return 0
+
+
+class BCryptPasswordEncoder(PasswordEncoder):
+    def encode(self, rawPassword: str) -> str:
+        return ''
 
 
 class Bean(object):
     method = None
 
-    def __init__(self, method):
-        self.method = method
+    def __init__(self, function):
+        self.function = function
+
+    def call(self, appConfig):
+        return self.function(appConfig)
 
     def __call__(self):
-        return self.method({})
+        # TODO: Is it OK? > {}
+        return self.function({})
 
 
 @Configuration
@@ -89,5 +110,9 @@ class AppConfig(object):
         return UserRepositoryImpl()
 
     @Bean
+    def passwordEncoder(self) -> PasswordEncoder:
+        return BCryptPasswordEncoder()
+
+    @Bean
     def userService(self) -> UserService:
-        return UserServiceImpl()
+        return UserServiceImpl(self.userRepository(), self.passwordEncoder())
