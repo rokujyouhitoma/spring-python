@@ -3,7 +3,6 @@ from typing import Any, Callable, Dict
 
 
 class Configuration(object):
-    appConfig = None
     instance = None
 
     def __init__(self, AppConfig: Callable) -> None:
