@@ -6,9 +6,11 @@ from typing import Any
 
 class Configuration(object):
     appConfig = None
+    instance = None
 
     def __init__(self, AppConfig) -> None:
         self.appConfig = AppConfig()
+        Configuration.instance = self  # TODO
 
 
 class ApplicationContext(object):
@@ -29,7 +31,6 @@ class AnnotationConfigApplicationContext(ApplicationContext):
             return s[:1].lower() + s[1:]
 
         methodName = getMethodName(name)
-        # TODO: xxx
         bean = getattr(self.configuration.appConfig, methodName)
         return bean.call(self.configuration.appConfig)
 
@@ -95,12 +96,11 @@ class Bean(object):
     def __init__(self, function):
         self.function = function
 
-    def call(self, appConfig):
-        return self.function(appConfig)
+    def __call__(self, *args, **kwargs):
+        return self.call(Configuration.instance, *args, **kwargs)
 
-    def __call__(self):
-        # TODO: Is it OK? > {}
-        return self.function({})
+    def call(self, appConfig, *args, **kwargs):
+        return self.function(appConfig, *args, **kwargs)
 
 
 @Configuration
