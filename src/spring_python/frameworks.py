@@ -34,11 +34,10 @@ class AnnotationConfigApplicationContext(ApplicationContext):
 
 
 class Bean(object):
-    appConfig = None
-
     def __init__(self, function: Callable) -> None:
         self.function = function
         self.scope = Singleton()
+        self.appConfig = None
 
     def __call__(self) -> Any:
         return self.call(Configuration.instance)
@@ -63,12 +62,10 @@ class Prototype(Scope):
 
 
 class Singleton(Scope):
-    beans: Dict = {}
+    def __init__(self) -> None:
+        self.beans: Dict = {}
 
     def getInstance(self, bean: Bean) -> Any:
         if bean in self.beans:
             return self.beans.get(bean)
-        else:
-            instance = bean.generate()
-            self.beans.setdefault(bean, instance)
-            return instance
+        return self.beans.setdefault(bean, bean.generate())
