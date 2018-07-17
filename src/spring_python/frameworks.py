@@ -9,6 +9,10 @@ class Configuration(object):
         self.appConfig = AppConfig()
         Configuration.instance = self  # TODO
 
+    def getBean(self, name: str) -> Any:
+        bean = getattr(self.appConfig, name)
+        return bean.call(self.appConfig)
+
 
 class ApplicationContext(object):
     def getBean(self, Klass: Callable) -> Any:
@@ -26,8 +30,7 @@ class AnnotationConfigApplicationContext(ApplicationContext):
             return s[:1].lower() + s[1:]
 
         methodName = getMethodName(name)
-        bean = getattr(self.configuration.appConfig, methodName)
-        return bean.call(self.configuration.appConfig)
+        return self.configuration.getBean(methodName)
 
 
 class Bean(object):
